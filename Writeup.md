@@ -185,10 +185,10 @@ Well it was quite fishy that they had download link and next to it <b>(use save 
 
 <p>Report is done now just need to check captured request, there was my session which is the first flag: </p>
 
-
+<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Bnd_first_flag.png"/>
 
 <b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}
-//session id img
+
 
 <p>After I got my session I had to find a token that is not in the cookie, I connected the dots quite fast because of that robot.txt at the start, all what I had to do is to modify my script a little bit in a way that will reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in context of an admin and exfiltrate data. 
 <br></br>Here is my modified script:</p>
