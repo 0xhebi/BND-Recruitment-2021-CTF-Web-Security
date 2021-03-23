@@ -53,7 +53,7 @@
 <p>As well I tried accessing <b><i>/i/</i></b> but I only got 404.</p>
 
 <p>At this point I've decided to play with that input field with black box approach.<br></br> 
-I provided printable ascii from pythons string library.
+I provided printable ascii from Python's <code>string</code> library.
 <br></br>
 And uploaded my test image file which resulted into this:
 </p>
@@ -142,8 +142,7 @@ At this point I was tapping in place for a while. After some time passed I've de
 </x:xmpmeta>
 ```
 
-<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript at the first place???<br></br>
-<br></br>I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
+<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript at the first place???<br></br>I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
 
 Next question: where will this trigger?<br></br>
 
@@ -184,7 +183,7 @@ Well it was quite fishy that they had download link and next to it <b>(use save 
 
 <img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Bnd_first_flag.png"/>
 
-<b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}
+<b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}</b>
 
 
 <p>After I got my session I had to find a token that is not in the cookie, I connected the dots quite fast because of that robot.txt at the start, all what I had to do is to modify my script a little bit in a way that will reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in context of an admin and exfiltrate data. 
