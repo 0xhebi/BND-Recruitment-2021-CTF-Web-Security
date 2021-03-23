@@ -145,9 +145,9 @@ At this point I was tapping in place for a while. After some time passed I've de
 
 <p>But then I realized that it accepts SVG as well, so question that came up is:<br></br><br></br>why didn't I try uploading SVG that contains javascript at the first place???<br></br>
 <br></br>
-I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br><br></br>
+I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
 
-Next question: where will this trigger?<br></br><br></br>
+Next question: where will this trigger?<br></br>
 
 Well it was quite fishy that they had download link and next to it <b>(use save link target as)</b>. 
 <br></br>
