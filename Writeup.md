@@ -53,9 +53,8 @@
 <p>As well I tried accessing <b><i>/i/</i></b> but I only got 404.</p>
 
 <p>At this point I've decided to play with that input field with black box approach.<br></br> 
-I provided printable ascii from pythons string library:
-<br></br><br></br>
-
+I provided printable ascii from pythons string library.
+<br></br>
 And uploaded my test image file which resulted into this:
 </p>
 
@@ -143,15 +142,13 @@ At this point I was tapping in place for a while. After some time passed I've de
 </x:xmpmeta>
 ```
 
-<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br><br></br>why didn't I try uploading SVG that contains javascript at the first place???<br></br>
-<br></br>
-I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
+<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript at the first place???<br></br>
+<br></br>I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
 
 Next question: where will this trigger?<br></br>
 
 Well it was quite fishy that they had download link and next to it <b>(use save link target as)</b>. 
 <br></br>
-
 </p>
 
 
