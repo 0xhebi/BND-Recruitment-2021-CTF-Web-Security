@@ -113,7 +113,7 @@ Content-Disposition: form-data; name="image"; filename="test.jpeg"
 Content-Type: image/jpeg
 </pre>
 
-<p>There is this WebKitFormBoundary with Content-Disposition, was thinking if I could make html injection and somehow sneak in some javascript there. Replacing <code>input</code> with <code>textarea</code> and trying to modify alt tags like name with this kind of payload:</p>
+<p>There is this WebKitFormBoundary with Content-Disposition, was thinking if I could make html injection and somehow sneak in some JavaScript there. Replacing <code>input</code> with <code>textarea</code> and trying to modify alt tags like name with this kind of payload:</p>
 
 ```html
  <textarea name='file"; filename="test.<img src=xx onerror=alert(1)>'>
