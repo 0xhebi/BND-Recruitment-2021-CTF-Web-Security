@@ -144,9 +144,9 @@ At this point I was tapping in place for a while. After some time passed I've de
 
 <p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript at the first place???<br></br>I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
 
-Next question: where will this trigger?<br></br>
+Next question: where the hell will this trigger?<br></br>
 
-Well it was quite fishy that they had download link and next to it <b>(use save link target as)</b>. 
+Well it was quite fishy that below uploaded image they had "Download Original" link and next to it: <b>(use save link target as)</b>. 
 <br></br>
 </p>
 
@@ -163,7 +163,7 @@ Well it was quite fishy that they had download link and next to it <b>(use save 
 <br></br>
 <h4><i>Stealing session and token</i></h4>
 
-<p>From this part it was clear that this is stored XSS. Next I had to steal the session cookie and the token. Description specified that token is not in the cookie though. Since I couldn't use my own server for exploit they offered us their which is capturing requests. So first I wrote the script to steal the session: </p><br></br>
+<p>From this part it was clear that this is stored XSS. Next I had to steal the session cookie and the token. Description specified that token is not in the cookie though. Since I couldn't use my own server for exploit they offered us "Request Catcher" that will do the job for us. So first I wrote the script to steal the session: </p><br></br>
 
 ```javascript
 (async function(){
