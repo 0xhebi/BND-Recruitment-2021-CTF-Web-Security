@@ -47,7 +47,7 @@
 
 <p>I tried to access <b><i>/help/headers</i></b> and I got some headers for current user that is visiting application or something, which was kinda weird. </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/httpheaders.png"/>
+<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/httpheaders.png"/>
 
 
 <p>As well I tried accessing <b><i>/i/</i></b> but I only got 404.</p>
@@ -158,7 +158,7 @@ Well it was quite fishy that they had download link and next to it <b>(use save 
 <p>Clicked on download and my alert got triggered!</p>
 
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/xss.png"/>
+<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/xss.png"/>
 
 <br></br>
 <h4><i>Stealing session and token</i></h4>
@@ -181,7 +181,7 @@ Well it was quite fishy that they had download link and next to it <b>(use save 
 
 <p>Report is done now just need to check captured request, there was my session which is the first flag: </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Bnd_first_flag.png"/>
+<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_first_flag.png?raw=true"/>
 
 <b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}</b>
 
@@ -203,7 +203,7 @@ Well it was quite fishy that they had download link and next to it <b>(use save 
 
 <p>Checked the captured request and I got my token/second flag: </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Bnd_second_flag.png" />
+<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_second_flag.png" />
 
 <b>#2 FLAG: <i>HL{r3fl3cted_c4t_p1ck1ng}</i></b>
 
