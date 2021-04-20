@@ -1,6 +1,10 @@
-<h3>CatsUP! image sharing service</h3>
+
+<header>
+<h3>CatsUP! image sharing service</h3><br>
+<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/chimg.png"/>
+</header><br>
 <h4><i>Challenge description:</i></h4>
- 
+
 <blockquote>
 	<h5><i>Introduction</i></h5>
 	<p>The admin of the image hosting service CatsUP! is keeping all the best pictures for himself, by removing them from the public web site. From a chat conversation with him we know that he is currently online and logged in to the admin panel.</p>
