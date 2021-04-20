@@ -1,8 +1,6 @@
-
-<header>
 <h3>#1 Challenge: CatsUP! image sharing service</h3><br>
 <img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/chimg.png" style="height: 80px;"/>
-</header><br>
+<br>
 <h4><i>Challenge description:</i></h4>
 
 <blockquote>
