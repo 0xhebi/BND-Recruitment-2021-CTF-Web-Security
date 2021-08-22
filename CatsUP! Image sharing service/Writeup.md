@@ -1,5 +1,5 @@
 <h3>#1 Challenge: CatsUP! image sharing service</h3><br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/chimg.png" style="height: 80px;">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/chimg.png" style="height: 80px;">
 <br>
 <h4><i>Challenge description:</i></h4>
 
@@ -23,8 +23,8 @@
 
 <h4><i>Intro/Thought process</i></h4>
 
-<p>After reading the description, name of the challenge is called CatsUP - first thought that came through my mind is that this challenge will be about some sort of XSS vulnerability. The reason is that from my previous experiences on CTFs usually title that includes "Cats" are about XSS.(I am quite sure that nearly every CTF player or security person knows this duuh!). Of course that doesn't mean that I am straight away right that this will be about XSS only.</p>
-<p>Anyway plan is to do some enumeration and hope that I will find some weird behaviour.</p>
+<p>After reading the description, the name of the challenge is called CatsUP - first thought that came through my mind is that this challenge will be about some sort of XSS vulnerability. The reason is that from my previous experiences on CTFs usually title that includes "Cats" are about XSS.(I am quite sure that nearly every CTF player or security person knows this duuh!). Of course that doesn't mean that I am straight away right that this will be about XSS only.</p>
+<p>Anyway, the plan is to do some enumeration and hope that I will find some weird behaviour.</p>
 
 <h4><i>Finding of Initial Vector</i></h4>
 
@@ -37,7 +37,7 @@
 	<li>Report image (that I've uploaded or randomly browsed) and send it to the admin</li>
 </ul>
 
-<p>As I could see there are a lot of space to test for unexpected behaviour. Before I started playing with input field for image name that I want to upload, I wanted to check for dissallowed paths through <code>robots.txt</code> file if it exists, this is just my usual tendency to start with on WebSec challenges... </p>
+<p>As I could see there is a lot of space to test for unexpected behaviour. Before I started playing with the name input field for the image upload, I wanted to check for disallowed paths through <code>robots.txt</code> file if it exists, this is just my usual tendency to start with on WebSec challenges... </p>
 <p>It seems we had something there: </p>
 
 <pre>
@@ -47,9 +47,9 @@
 </pre>
 
 
-<p>I tried to access <b><i>/help/headers</i></b> and I got some headers for current user that is visiting application or something, which was kinda weird. </p>
+<p>I tried to access <b><i>/help/headers</i></b> and I got some headers for the current user that is visiting an application, which was kinda weird. </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/httpheaders.png"/>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/httpheaders.png"/>
 
 
 <p>As well I tried accessing <b><i>/i/</i></b> but I only got 404.</p>
@@ -103,7 +103,7 @@ Sec-Fetch-Site: same-origin
 Sec-Fetch-Mode: navigate
 Sec-Fetch-User: ?1
 Sec-Fetch-Dest: document
-Referer: https://183fffb0-94ea-437d-b075-19dcb9ceb107.idocker.vuln.land/upload
+Referrer: https://183fffb0-94ea-437d-b075-19dcb9ceb107.idocker.vuln.land/upload
 Accept-Encoding: gzip, deflate
 Accept-Language: en-US,en;q=0.9
 
@@ -115,7 +115,7 @@ Content-Disposition: form-data; name="image"; filename="test.jpeg"
 Content-Type: image/jpeg
 </pre>
 
-<p>There is this WebKitFormBoundary with Content-Disposition, was thinking if I could make html injection and somehow sneak in some JavaScript there. Replacing <code>input</code> with <code>textarea</code> and trying to modify alt tags like name with this kind of payload:</p>
+<p>There is this WebKitFormBoundary with Content-Disposition. I was thinking if I could make an html injection and somehow sneak in some JavaScript there. Replacing <code>input</code> with <code>textarea</code> and trying to modify alt tags like name, with this kind of payload:</p>
 
 ```html
  <textarea name='file"; filename="test.<img src=xx onerror=alert(1)>'>
@@ -127,7 +127,7 @@ Content-Type: image/jpeg
 Content-Disposition: form-data; name="file%22; filename=%22test.<img src=xx onerror=alert(1)>"
 ```
 <p>
-At this point I was tapping in place for a while. After some time passed I've decided to lookup other features of the app. Browsed random image of a cat and downloaded it(through save image as). Exiftoold the image to see if there is anything interesting there. There were no interesting metadata in the image itself. Got an idea of trying to sneak JavaScript again through some exif metadata like Artist/Creator. And that was unfortunately sanitized as well: </p>
+At this point I was tapping in place for a while. After some time passed I've decided to look up other features of the app. Browsed a random image of a cat and downloaded it(through save image as). Exiftoold the image to see if there is anything interesting there. There was no interesting metadata in the image itself. Got an idea of trying to sneak JavaScript again through some exif metadata like Artist/Creator. And that was unfortunately sanitized as well: </p>
 
 
 ```xml
@@ -144,11 +144,11 @@ At this point I was tapping in place for a while. After some time passed I've de
 </x:xmpmeta>
 ```
 
-<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript at the first place???<br></br>I converted my test.jpeg into test.svg, added simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
+<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript in the first place???<br></br>I converted my test.jpeg into test.svg, added a simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
 
 Next question: where the hell will this trigger?<br></br>
 
-Well it was quite fishy that below uploaded image they had "Download Original" link and next to it: <b>(use save link target as)</b>. 
+Well it was quite fishy that below the uploaded image they had a "Download Original" link and next to it: <b>(use save link target as)</b>. 
 <br></br>
 </p>
 
@@ -160,12 +160,12 @@ Well it was quite fishy that below uploaded image they had "Download Original" l
 <p>Clicked on download and my alert got triggered!</p>
 
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/xss.png"/>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/xss.png"/>
 
 <br></br>
 <h4><i>Stealing session and token</i></h4>
 
-<p>From this part it was clear that this is stored XSS. Next I had to steal the session cookie and the token. Description specified that token is not in the cookie though. Since I couldn't use my own server for exploit they offered us "Request Catcher" that will do the job for us. So first I wrote the script to steal the session: </p><br></br>
+<p>From this part it was clear that this is stored XSS. Next I had to steal the session cookie and the token. Description specified that the token is not in the cookie though. Since I couldn't use my own server for exploit they offered us a "Request Catcher" that would do the job for us. So first I wrote the script to steal the session: </p><br></br>
 
 ```javascript
 (async function(){
@@ -183,12 +183,12 @@ Well it was quite fishy that below uploaded image they had "Download Original" l
 
 <p>Report is done now just need to check captured request, there was my session which is the first flag: </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_first_flag.png?raw=true"/>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_first_flag.png?raw=true"/>
 
 <b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}</b>
 
 
-<p>After I got my session I had to find a token that is not in the cookie, I connected the dots quite fast because of that robot.txt at the start, all what I had to do is to modify my script a little bit in a way that will reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in context of an admin and exfiltrate data. 
+<p>After I got my session I had to find a token that was not in the cookie. I connected the dots quite fast because of that robot.txt at the start,all what I had to do was to modify my script a little bit in a way that will cause the reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in context of an admin and exfiltrate data. 
 <br></br>Here is my modified script:</p>
 
 ```javascript
@@ -205,12 +205,9 @@ Well it was quite fishy that below uploaded image they had "Download Original" l
 
 <p>Checked the captured request and I got my token/second flag: </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_second_flag.png" />
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_second_flag.png" />
 
 <b>#2 FLAG: <i>HL{r3fl3cted_c4t_p1ck1ng}</i></b>
-
-
-
 
 
 
