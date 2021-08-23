@@ -104,7 +104,7 @@ if (!$login || !$password)
     die();
 }
 
-$user = db_query_single("SELECT * FROM users WHERE username = :login", array(
+$user = db_query_single('SELECT * FROM users WHERE username = :login', array(
     ':login' => $login
 ));
 
