@@ -91,7 +91,6 @@ To dump data from .git directory I've used <a href="https://github.com/internetw
 <p>
 As seen there are a lot of restored files, they mentioned that login form didn't have any vulnerabilities. I've checked the login.php just in case and there was nothing interesting there.
 </p>
-<pre>
 ```php
 <?php
 
@@ -121,8 +120,9 @@ $jwt = get_token($user);
 setcookie('session', $jwt);
 
 header('Location: /');
+?>
 ```
-</pre>
+
 Typical credentials check with Sqlite prepared statement. Next there was <code>/inc</code> directory with <code>auth.php</code> page, which contained some auth logic:
 
 
@@ -170,6 +170,7 @@ function get_key($kid) {
     return array($kid, new Key(file_get_contents('keys/' . $kid)));
 }
 ```
+
 First glance of it showed that the app was using JWT token for authentication along with some Lcobucci library. Without thoroughly analyzing at first, I was thinking that this might be something about the version of that library itself, maybe there was some known vulnerability there that can be further exploited. I had <code>composer.lock </code> file:  
 ```json
  "packages": [
