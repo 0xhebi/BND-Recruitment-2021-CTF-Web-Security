@@ -786,7 +786,7 @@ def q(url):
     print("current FLAG: ",flag)
 ```
 
-And that was the flag:<br><br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag_ss.png"/><br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag.png"/>
+And that was the <b><i>flag</i></b>:<br><br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag_ss.png"/><br></br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag.png"/>
 
 
 
