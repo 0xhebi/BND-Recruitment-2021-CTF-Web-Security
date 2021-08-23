@@ -92,34 +92,35 @@ To dump data from .git directory I've used <a href="https://github.com/internetw
 As seen there are a lot of restored files, they mentioned that login form didn't have any vulnerabilities. I've checked the login.php just in case and there was nothing interesting there.
 </p>
 ```php
-    <?php
-    
-    include('inc/init.php');
-    
-    $login = $_POST['username'];
-    $password = $_POST['password'];
-    
-    if (!$login || !$password) {
-        header('Location: /?err=Login+failed');
-        die();
-    }
-    
-    $user = db_query_single("SELECT * FROM users WHERE username = :login", array(':login' => $login));
-    
-    if (!$user) {
-        header('Location: /?err=Login+failed');
-        die();
-    }
-    
-    if (!password_verify($password, $user['password'])) {
-        header('Location: /?err=Login+failed');
-        die();
-    }
-    
-    $jwt = get_token($user);
-    setcookie('session', $jwt);
-    
-    header('Location: /');
+<?php
+include ('inc/init.php');
+
+$login = $_POST['username'];
+$password = $_POST['password'];
+
+if (!$login || !$password)
+{
+    header('Location: /?err=Login+failed');
+    die();
+}
+
+$user = db_query_single("SELECT * FROM users WHERE username = :login", array(
+    ':login' => $login
+));
+
+if (!$user)
+{
+    header('Location: /?err=Login+failed');
+    die();
+}
+if (!password_verify($password, $user['password']))
+{
+    header('Location: /?err=Login+failed');
+    die();
+}
+$jwt = get_token($user);
+setcookie('session', $jwt);
+header('Location: /');
 ```
 
 Typical credentials check with Sqlite prepared statement. Next there was <code>/inc</code> directory with <code>auth.php</code> page, which contained some auth logic:
