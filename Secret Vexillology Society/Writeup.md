@@ -81,7 +81,7 @@ Guess what? Got the config content: <br>
 	name = Secret Vexillology Master
 	email = master@localhost
 </pre>
-<p>This made me think that I didn't use DirBuster properly or the wordlist wasn't right, because it didn't find<code>/.git/</code> directory, glad that I randomly stumbleupon it.<br>Ok from here this is source code disclosure via the git directory which means that access is not restricted to that directory, this is a typical example of "Operational class vulnerability" which means bad configuration of the Apache server in this case. You can read more about about git disclosure <a href="https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/">here</a>
+<p>This made me think that I didn't use DirBuster properly or the wordlist wasn't right, because it didn't find<code>/.git/</code> directory, glad that I randomly stumbleupon it.<br>Ok from here this is source code disclosure via the git directory which means that access is not restricted to that directory, this is a typical example of "Operational class vulnerability" which means bad configuration of the Apache server in this case. You can read more about about git disclosure <a href="https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/">here</a>.
 <br>
 To dump data from .git directory I've used <a href="https://github.com/internetwache/GitTools">GitTools</a><br>After that I successfully git restored deleted source code files:<br>
 <img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/gittools.png"/><br>
@@ -91,7 +91,7 @@ To dump data from .git directory I've used <a href="https://github.com/internetw
 <p>
 As seen there are a lot of restored files, they mentioned that login form didn't have any vulnerabilities. I've checked the login.php just in case and there was nothing interesting there.
 </p>
-```php
+```php5
 <?php
 
 include('inc/init.php');
@@ -120,13 +120,12 @@ $jwt = get_token($user);
 setcookie('session', $jwt);
 
 header('Location: /');
-?>
 ```
 
 Typical credentials check with Sqlite prepared statement. Next there was <code>/inc</code> directory with <code>auth.php</code> page, which contained some auth logic:
 
 
-```php
+```php5
 <?php
 require 'vendor/autoload.php';
 
