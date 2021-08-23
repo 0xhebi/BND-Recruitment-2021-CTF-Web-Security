@@ -38,7 +38,7 @@ The commands were:
 </ul>
 <br>
 </br>
-Since I was interested in the flag, I've checked the response for that stat command which looked something like this:   
+Since I was interested in the flag, I've checked the response for that stat command which looked something like this:<br>  
 <blockquote>
 <pre>
 # stat /app/flag.txt
@@ -52,7 +52,7 @@ Change: 2021-08-19 18:34:01.684160766 +0000
 </pre>
 </blockquote>
 
-Nothing seemed unusual there, this challenge though does require some "digital forensics". Responses of other commands looked like this:  
+Nothing seemed unusual there, this challenge though does require some "digital forensics". Responses of other commands looked like this:<br>  
 
 
 <blockquote>
