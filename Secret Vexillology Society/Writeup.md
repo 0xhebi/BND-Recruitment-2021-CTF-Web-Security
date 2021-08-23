@@ -5,7 +5,7 @@
 <blockquote>
 <h5><i>Introduction</i></h5>
 <p>
-A secret vexiology society has shown up with a weird blog. They seem to have something huge coming up soon. Maybe you can find a way around their security and take a glance at it before they release it...
+A secret vexillology society has shown up with a weird blog. They seem to have something huge coming up soon. Maybe you can find a way around their security and take a glance at it before they release it...
 </p>
 <h5><i>Goal</i></h5>
 <p>
@@ -42,13 +42,13 @@ If you get an invalid flag message, please restart the container and re-run the 
 <h4><i>Intro</i></h4>
 
 <p>
-From the description of the challenge the goals seemed pretty straight forward. Upon starting the container and accessing the app I've started with simple observing. Application itself didn't seem to have much of content, had a home page with 3 posts, login form and that seemed pretty much it on the first sight. It felt like leaking the source code will be a little bit of a hassle. 
+From the description of the challenge the goals seemed pretty straight forward. Upon starting the container and accessing the app I've started with simple observing. Application itself didn't seem to have much content, had a home page with 3 posts, a login form and that seemed pretty much it at first sight. It felt like leaking the source code will be a little bit of a hassle. 
 </p>
 
 
 <h4><i>Leaking the source code</i></h4>  
 <p>
-I inspected the page and there were no any kind of trails for some spicy JavaScript or anything that could be of a use. Just UI libraries like Bootstrap etc. As usual I've checked for <code>robots.txt</code> but there wasn't one. So it was time to use <a href="https://tools.kali.org/web-applications/dirbuster">DirBuster</a>
+I inspected the page and there were no any kind of trails of some spicy JavaScript or anything that could be of any use. Just UI libraries like Bootstrap etc. As usual I've checked for <code>robots.txt</code> but there wasn't one. So it was time to use <a href="https://tools.kali.org/web-applications/dirbuster">DirBuster</a>
 which is basically a bruteforce app for directories and files. The results were decent:<br><img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/dirbuster.png"/><br>
 I navigated to /edit.php since it has responded with 200, and there were some errors on the page:  
 </p>
@@ -67,7 +67,7 @@ Fatal error: Uncaught Error: Call to a member function bindValue() on bool in /v
 Interesting, this definitely gave me info about the stack that is being used, it is Sqlite3 and it seems there are some prepared statements. I instantly thought about testing for LFI, as well as that later on this will probably lead to some SQL injection, but that was pretty far ahead atm.  
   
 Typical LFI for start with <code>/edit.php?user_obj=../../.././../../../var/www/html/admin.php</code><br>
-That didn't work so I tried php://filter <code>/edit.php?user_obj=php://filter/convert.base64-encode/resource=admin.php</code><br> Changing parameters from user_obj to post_id and trying to leak something all over again for various resources just didn't seem to work at all. As well I've tried other path traversals to other files with other known LFI techniques but without success. Slowly I was running out of ideas, other paths with 302 response were just redirecting back to index.php which wasn't of any use to me. After <b><i>hours</i></b> of thinking something came up to my mind randomly, I wanted to check if there was /.git/ directory or any kind of similiar configs...<br>  
+That didn't work so I tried php://filter <code>/edit.php?user_obj=php://filter/convert.base64-encode/resource=admin.php</code><br> Changing parameters from user_obj to post_id and trying to leak something all over again for various resources just didn't seem to work at all. As well I've tried other path traversals to other files with other known LFI techniques but without success. Slowly I was running out of ideas, other paths with 302 response were just redirecting back to index.php which wasn't of any use to me. After <b><i>hours</i></b> of thinking something came up to my mind randomly, I wanted to check if there was /.git/ directory or any kind of similar configs...<br>  
 <code>/.git/</code> seemed to be forbidden which mean it exists, then I tried <code>/.git/config</code><br><br>
 Guess what? Got the config content: <br>
 </p>
@@ -81,7 +81,7 @@ Guess what? Got the config content: <br>
 	name = Secret Vexillology Master
 	email = master@localhost
 </pre>
-<p>This made me think that I didn't use DirBuster properly or the wordlist wasn't right, because it didn't find<code>/.git/</code> directory, glad that I randomly stumbleupon it.<br>Ok from here this is source code disclosure via git directory which means that access is not restricted to that directory, this is typical example of "Operational class vulnerability" which means bad configuration of the Apache server in this case. You can read more about about git disclosure <a href="https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/">here</a>
+<p>This made me think that I didn't use DirBuster properly or the wordlist wasn't right, because it didn't find<code>/.git/</code> directory, glad that I randomly stumbleupon it.<br>Ok from here this is source code disclosure via the git directory which means that access is not restricted to that directory, this is a typical example of "Operational class vulnerability" which means bad configuration of the Apache server in this case. You can read more about about git disclosure <a href="https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/">here</a>
 <br>
 To dump data from .git directory I've used <a href="https://github.com/internetwache/GitTools">GitTools</a><br>After that I successfully git restored deleted source code files:<br>
 <img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/gittools.png"/><br>
@@ -89,7 +89,8 @@ To dump data from .git directory I've used <a href="https://github.com/internetw
 
 <h4><i>Authentication exploit</i></h4>
 <p>
-As seen there are a lot of restored files, they mentioned that login form didn't have any vulnerabilities. I've checked the login.php just in case and there was nothing interesting there.  
+As seen there are a lot of restored files, they mentioned that login form didn't have any vulnerabilities. I've checked the login.php just in case and there was nothing interesting there.
+</p>
 ```php
 <?php
 include('inc/init.php');
@@ -119,8 +120,9 @@ setcookie('session', $jwt);
 
 header('Location: /');
 ```
-</p>
+<p>
 Typical credentials check with Sqlite prepared statement. Next there was <code>/inc</code> directory with <code>auth.php</code> page, which contained some auth logic:
+</p>
 
 ```php
 <?php
@@ -166,7 +168,7 @@ function get_key($kid) {
     return array($kid, new Key(file_get_contents('keys/' . $kid)));
 }
 ```
-First glance of it showed that the app was using JWT token for authentication with along with some Lcobucci library. Without thouroughly analyzing at first, I was thinking that this might be something about of the version of that library itself, maybe there was some known vulnerability there that can be further exploited. I had <code>composer.lock </code> file:  
+First glance of it showed that the app was using JWT token for authentication along with some Lcobucci library. Without thoroughly analyzing at first, I was thinking that this might be something about the version of that library itself, maybe there was some known vulnerability there that can be further exploited. I had <code>composer.lock </code> file:  
 ```json
  "packages": [
         {
@@ -320,7 +322,7 @@ if ($user) {
 }
 ```
 
-Alright <code>$user</code> variable has that <code>handle_auth()</code> which is returning us object with JWT's claims. So it was time to re-analyze that <code>auth.php</code> file. Function <code>handle_auth()</code> is checking for cookie session which is supposed to be JWT token after that it is parsing the token and getting the key using <code>get_key($kid)</code> function from "kid" parameter. And verifying the key with signature that happens to be SHA 384. Taking a better look at <code>get_key($kid)</code> function it takes "kid" parameter from JWT, then it does check on it, if there is no $kid or if $kid is not matching regex pattern or if "kid" doesn't exist as file in <code>/keys/</code> directory set $kid to default symlink that is pointing to key id. After all kid is Header Parameter that is a hint indicating which key
+Alright <code>$user</code> variable has that <code>handle_auth()</code> which is returning us an object with JWT's claims. So it was time to re-analyze that <code>auth.php</code> file. Function <code>handle_auth()</code> is checking for cookie session which is supposed to be JWT token after that it is parsing the token and getting the key using <code>get_key($kid)</code> function from "kid" parameter. And verifying the key with a signature that happens to be SHA 384. Taking a better look at <code>get_key($kid)</code> function it takes "kid" parameter from JWT, then it does check on it, if there is no $kid or if $kid is not matching regex pattern or if "kid" doesn't exist as file in <code>/keys/</code> directory set $kid to default symlink that is pointing to key id. After all kid is Header Parameter that is a hint indicating which key
 was used to secure the JWS(JSON Web Signature). From RFC:
 <blockquote>
 <pre>
@@ -357,7 +359,7 @@ After the first match is found, the subsequent searches are continued on from en
 
 Which means that preg_match stops looking after first match while preg_match_all continues until it finishes processing the entire string.<br>
 
-So as long as my "kid" parameter contains the string to match <code>'/[a-f0-9]{32}/'</code> regex pattern I will be able to bypass that check, next check would be <code>!file_exists('keys/' . $kid)</code> to bypass that it's pretty obvious that we can craft "kid" as a path traversal since file_exist is not sanitized by any mean. But I don't know the id of the key file unfortunately, so it took me a little bit to realize how can I use this as levarage. It is not obvious on the first site( at least it wasn't for me at start) but at the end it is quite simple, just thinking outside of the box.  
+So as long as my "kid" parameter contains the string to match <code>'/[a-f0-9]{32}/'</code> regex pattern I will be able to bypass that check, next check would be <code>!file_exists('keys/' . $kid)</code> to bypass that it's pretty obvious that we can craft "kid" as a path traversal since file_exist is not sanitized by any mean. But I don't know the id of the key file unfortunately, so it took me a little bit to realize how I can use this as leverage. It is not obvious on the first site( at least it wasn't for me lol) but at the end it is quite simple, just thinking outside of the box.  
   
 The question is: what do I control from this point?
 
@@ -406,7 +408,7 @@ Successfully bypassed auth logic.
 <br>
 <h4><b><i>Getting the flag</i></b></h4>
 <p>
-Last step was was leaking the data from database. After successfully bypassing the flag I was able to edit posts that were made. I've checked the source code of <code>edit.php</code>  
+Last step was leaking the data from the database. After successfully bypassing the flag I was able to edit posts that were made. I've checked the source code of <code>edit.php</code>  
   
 ```php
 <?php
@@ -480,7 +482,7 @@ if ($user) {
     $user_obj = db_query_single("select * from users where username = '{$user['sub']}'");
 }
 ```
-It seems whatever is in JWT's <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2">Sub claim</a> will be embedded directly to the query and not as parameter to be bound. Which means that prepared statement is not going to protect that query from SQL injection. I've also checked if $user_obj is being displayed somewhere in the html and that was not the case, so I will not be able to see the output of sql injection that i am going to test against. From this it is clear this will be Blind SQL injection. It was time to make a script for this.
+It seems whatever is in JWT's <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2">Sub claim</a> will be embedded directly to the query and not as a parameter to be bound. Which means that prepared statement is not going to protect that query from SQL injection. I've also checked if $user_obj is being displayed somewhere in the html and that was not the case, so I will not be able to see the output of sql injection that I am going to test against. From this it is clear this will be Blind SQL injection. It was time to make a script for this.
 </p><br>
 
 <h4><b><i>Blind SQL injection</i></b></h4>
@@ -656,7 +658,7 @@ Stack trace:
 eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCIsImtpZCI6Ii4uLy5naXQvb2JqZWN0cy9iMC9lMjdmNmFkZmY1NGM2NzdkMzE4MjVlZGNkNzViYjZkMGU4NzYzZSJ9.eyJzdWIiOiJhZG1pbicgQU5EIDE9MiAtLSIsIm5hbWUiOiJBZG1pbiIsImFkbWluIjp0cnVlfQ.Pjy6XNk0hag_g4DOO1pF1PzG1rxA2PZaxsQ5Y2VDbib9bPw4dh2zBylvffZWhjKZ
 ``` 
 
-It did return 200 status code which means that auth succeded with that error Stack trace, that concludes this is blind sql injection, but I had to modify that script for better error handling.<br>  
+It did return 200 status code which means that auth succeeded with that error Stack trace, which concludes this is blind sql injection, but I had to modify that script for better error handling.<br>  
 Now it was pretty much time to start enumerating database and search for that flag, luckily we had <code>/data/create.sql</code>:  
 
 ```sql
@@ -682,7 +684,7 @@ CREATE TABLE posts (
   foreign key (user_id) references user(id)
 );
 ```
-That might speed up the process. My first target was secrets, started off with checking the value of secret with id of 1.  
+That might speed up the process. My first target was secrets, I’ve started off with checking the value of secret with id of 1.  
   
 ```python
 import requests
@@ -718,7 +720,7 @@ def q(url):
 ```
 I modified the script with some "better handling"..<br>
 result was : <code>8ab261ed1a4f2cb73d091920d27ebc6b54b5ea474ba5fafa99a42ed35668</code><br>
-Unfortunately that wasn't the flag, system didn't accept it, I kept going on for first ~10 ids.
+Unfortunately that wasn't the flag, the system didn't accept it, I kept going on for the first ~10 ids.
 
 And it seems I only got values for first 5, tho I did check for key values as well so this were the results:
 
@@ -757,7 +759,7 @@ def vals(url):
   print("values",v)
 ```
 
-In hope there are no duplicate id containing values this will give me unique count of values for ids that are not: 1,2,3,4,5 and max id number.
+If there are no duplicate ids containing values, this will give me a unique count of values for ids that are not: 1,2,3,4,5 and max id number.
 
 It resulted into: [18, 67]
 
@@ -792,3 +794,5 @@ And that was the flag:<br><br><img src="https://github.com/DejanJS/BND-Recruitme
 
   
  
+
+
