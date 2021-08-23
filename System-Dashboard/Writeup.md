@@ -223,10 +223,12 @@ I've continued exploring around to see if there is anything more interesting out
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/dive1.png">
 <br>
 </br>
-<p>There were two interesting scripts added: register-commands.py and register-commands.sh. I quickly looked for those file, there are multiple ways of searching through docker overlay2 directory, I am specifically looking for diff on those scripts - </p>
+<p>There were two interesting scripts added: register-commands.py and register-commands.sh. I quickly looked for those file, there are multiple ways of searching through docker overlay2 directory, I am specifically looking for diff on those scripts</p>
+
 ```bash
-ls -la /var/lib/docker/overlay2/*/diff/register-commands.py && ls -la /var/lib/docker/overlay2/*/diff/register-commands.sh
+   ls -la /var/lib/docker/overlay2/*/diff/register-commands.py && ls -la /var/lib/docker/overlay2/*/diff/register-commands.sh
 ```
+
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/rcom.png">
 
 The content looked pretty interesting:
