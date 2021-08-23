@@ -25,7 +25,7 @@
 
 <h4><i>Intro/Thought process</i></h4>
 
-<p>This challenge had web app and docker image file that we can setup in our local environment. The app itself has "built-in" commands that we can send to the server and get response back about files, directories, etc.
+<p>This challenge had a web app and docker image file that we can set up in our local environment. The app itself has shell commands that user can execute on the server and get responses back about files, directories, etc.
 The commands were:
 <ul>
  <li>ip a</li>
@@ -37,7 +37,7 @@ The commands were:
  <li>stat /app/flag.txt</li>
 </ul>
 <br>
-Since I was interested in a flag, I'v checked the response for that stat command which looked something like this:   
+Since I was interested in the flag, I've checked the response for that stat command which looked something like this:   
 <blockquote>
 <pre>
 # stat /app/flag.txt
@@ -51,7 +51,7 @@ Change: 2021-08-19 18:34:01.684160766 +0000
 </pre>
 </blockquote>
 
-Nothing seemed unusual there, this challenge tho does require some "digital forensics". Other commands response were like this:  
+Nothing seemed unusual there, this challenge though does require some "digital forensics". Responses of other commands looked like this:  
 
 
 <blockquote>
@@ -96,14 +96,15 @@ Nothing seemed unusual there, this challenge tho does require some "digital fore
    /app/templates/index.html
   </pre>
 </blockquote>
-I decided that to pull that docker image and set it up locally to see what is in that /app/ directory.
+I decided to pull that docker image and set it up locally to see what is in that /app/ directory.
 </p>
 <br>
 
 <h4><i>Docker inspection</i></h4>
 
 <p>
-After setting up docker and running the image I could see the app.py source code:
+After setting up docker and running the image I could see the <code>app.py</code> source code:
+
 
 ```python
 from flask import Flask, request, abort, render_template
@@ -155,7 +156,7 @@ def index():
     
 ```
 
-Commands were signed, and verified by the key that is in config.json file. Every command has it's own signature which is being verified as NONCE + command which is quite interesting.   
+Commands were signed, and verified by the key that is in the config.json file. Every command has its own signature which is being verified as "NONCE + command" which is quite interesting.   
 I am talking about this line <code>if not KEY.verify(sig, NONCE + cmd.encode('utf-8')):</code>
 
 The <i>config.json</i>:  
@@ -211,8 +212,8 @@ The <i>config.json</i>:
 
 ```
 
-Since those are <a href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm">ecdsa's</a> signatures, I was hoping this will be one of those nonce reusable attacks, but that wasn't the case, as you can see all those signature don't have common starting bytes so the same nonce wasn't used in process of signing. And from previous source code, key verification was using nonce + command to verify signature, which means nonce was used as salt.<br>
-I've continued exploring around to see if there is anything more interesting out there but there was nothing that caught my eye, at this point I was checking for various python libraries that are being used and their versions in hope there is some sort of already know vulnerability. After some time of enumeration I looked up what are common forensics practices for docker. One of the things that pop was tool called <a href="https://github.com/wagoodman/dive" >dive</a>. Dive is basically a tool for exploring docker images and layers.
+Since those are <a href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm">ecdsa's</a> signatures, I was hoping this will be one of those nonce reusable attacks, but that wasn't the case, as you can see all those signature don't have common starting bytes so the same nonce wasn't used in process of signing. And from previous source code, key verification was using nonce + command to verify signature, which means nonce was used as salt.<br></br>
+I've continued exploring around to see if there is anything more interesting out there but there was nothing that caught my eye, at this point I was checking for various python libraries that are being used and their versions in hope there is some sort of already known vulnerability. After some time of enumeration I looked up what are common forensics practices for docker. One of the things that popped was a tool called <a href="https://github.com/wagoodman/dive" >dive</a>. Dive is basically a tool for exploring docker images and layers.
 </p>
 
 <br>
@@ -284,7 +285,7 @@ with open('/app/config.json', 'w') as f:
     f.write(json.dumps(config))
 ```
 
-In that .sh script the Private key is being generated as a tmp file using mktemp command, I decided to take a look back to the dive layer inspector and check if there are any changes in the tmp directory.<br>
+In that bash script the Private key is being generated as a tmp file using mktemp command, I decided to take a look back to the dive layer inspector and check if there are any changes in the tmp directory.<br>
 And there were changes indeed:  
 
 <img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/tmp.png">
@@ -302,7 +303,7 @@ xGXPShKvE79OQKsNH7z9HLOPUJrABQ==
 
 <h4><i> Getting the flag </i></h4>
 <p>
-Since I found the private key that is being used to sign the commands, all I need to do is to sign my custom command and print out the flag. I know that the flag is on their server so all I had to do is cat that file and grab the flag, so simple python script will do this for me.
+Since I found the private key that is being used to sign the commands, all I need to do is to sign my custom command and print out the flag. I know that the flag is on their server so all I had to do is to cat that file and grab the flag, so a simple python script will do this for me.
 
 ```python
 
@@ -341,7 +342,7 @@ so I replaced the cmd to cat the flag, and signature that my script produced.
 <p>But I didn't get the flag unfortunately :(<br>
 <img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/noflag.png">
 
-I had to take a look at the template of the page, and check if there is any rendering data logic there. And it looks like it was typical Jinja template.
+I had to take a look at the template of the page and check if there is any rendering data logic there. And it looks like it was a typical Jinja template.
 
 ```html
 <!doctype html>
