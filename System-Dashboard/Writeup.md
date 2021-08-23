@@ -1,6 +1,6 @@
-<h3>#3 Challenge: System-Dashboard</h3><br></br>
+<h3>#3 Challenge: System-Dashboard</h3>
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/chimg3.png" style="height: 80px;">
-<br></br>
+
 <h4><i>Challenge description:</i></h4>
 
 <blockquote>
