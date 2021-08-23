@@ -1,5 +1,5 @@
-<h3>#2 Challenge: Secret Vexillology Society</h3>  
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/101.png">
+<h3>#2 Challenge: Secret Vexillology Society</h3> 
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/101.png" style="height: 80px;">
 
 <h4><i>Challenge description: </i></h4>
 <blockquote>
@@ -42,14 +42,14 @@ If you get an invalid flag message, please restart the container and re-run the 
 <h4><i>Intro</i></h4>
 
 <p>
-From the description of the challenge the goals seemed pretty straight forward. Upon starting the container and accessing the app I've started with simple observing. Application itself didn't seem to have much content, had a home page with 3 posts, a login form and that seemed pretty much it at first sight. It felt like leaking the source code will be a little bit of a hassle. 
+From the description of the challenge the goals seemed pretty straight forward. Upon starting the container and accessing the app I've started with simple observing. Application itself didn't seem to have much of a content, had a home page with 3 posts, a login form and that seemed pretty much it. It felt like leaking the source code will be a little bit of a hassle. 
 </p>
 
 
 <h4><i>Leaking the source code</i></h4>  
 <p>
 I inspected the page and there were no any kind of trails of some spicy JavaScript or anything that could be of any use. Just UI libraries like Bootstrap etc. As usual I've checked for <code>robots.txt</code> but there wasn't one. So it was time to use <a href="https://tools.kali.org/web-applications/dirbuster">DirBuster</a>
-which is basically a bruteforce app for directories and files. The results were decent:<br><img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/dirbuster.png"/><br>
+which is basically a bruteforce app for directories and files. The results were decent:<br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/dirbuster.png"/><br>
 I navigated to /edit.php since it has responded with 200, and there were some errors on the page:  
 </p>
 <pre>
@@ -64,10 +64,10 @@ Warning: SQLite3::prepare(): Unable to prepare statement: 1, near "AND": syntax 
 Fatal error: Uncaught Error: Call to a member function bindValue() on bool in /var/www/html/inc/db.php:11 Stack trace: #0 /var/www/html/inc/db.php(19): db_query() #1 /var/www/html/edit.php(16): db_query_single() #2 {main} thrown in /var/www/html/inc/db.php on line 11  
 </pre>
 <p>
-Interesting, this definitely gave me info about the stack that is being used, it is Sqlite3 and it seems there are some prepared statements. I instantly thought about testing for LFI, as well as that later on this will probably lead to some SQL injection, but that was pretty far ahead atm.  
+Interesting, this definitely gave me info about the stack that is being used, it is Sqlite3 and it seems there are some prepared statements. I instantly thought about testing for LFI, but later on this will probably lead to some SQL injection.  
   
-Typical LFI for start with <code>/edit.php?user_obj=../../.././../../../var/www/html/admin.php</code><br>
-That didn't work so I tried php://filter <code>/edit.php?user_obj=php://filter/convert.base64-encode/resource=admin.php</code><br> Changing parameters from user_obj to post_id and trying to leak something all over again for various resources just didn't seem to work at all. As well I've tried other path traversals to other files with other known LFI techniques but without success. Slowly I was running out of ideas, other paths with 302 response were just redirecting back to index.php which wasn't of any use to me. After <b><i>hours</i></b> of thinking something came up to my mind randomly, I wanted to check if there was /.git/ directory or any kind of similar configs...<br>  
+Typical LFI to start with <code>/edit.php?user_obj=../../.././../../../var/www/html/admin.php</code><br>
+That didn't work so I tried <code>/edit.php?user_obj=php://filter/convert.base64-encode/resource=admin.php</code><br> Changing parameters from user_obj to post_id and trying to leak something all over again for various resources just didn't seem to work at all. As well I've tried other path traversals to other files with other known LFI techniques but without success. Slowly I was running out of ideas, other paths with 302 response were just redirecting back to index.php which wasn't of any use to me. After <b><i>hours</i></b> of thinking something came up to my mind randomly, I wanted to check if there was /.git/ directory or any kind of similar configs...<br>  
 <code>/.git/</code> seemed to be forbidden which mean it exists, then I tried <code>/.git/config</code><br><br>
 Guess what? Got the config content: <br>
 </p>
@@ -81,10 +81,10 @@ Guess what? Got the config content: <br>
 	name = Secret Vexillology Master
 	email = master@localhost
 </pre>
-<p>This made me think that I didn't use DirBuster properly or the wordlist wasn't right, because it didn't find<code>/.git/</code> directory, glad that I randomly stumbleupon it.<br></br>Ok from here this is source code disclosure via the git directory which means that access is not restricted to that directory, this is a typical example of "Operational class vulnerability" which means bad configuration of the Apache server in this case. You can read more about about git disclosure <a href="https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/">here</a>.
+<p>This made me think that I didn't use DirBuster properly or the wordlist wasn't right, because it didn't find<code>/.git/</code> directory, glad that I randomly stumbleupon it.<br></br>Ok from here this is source code disclosure via the git directory, which means that access is not restricted to that directory. This is a typical example of "Operational class vulnerability" as in bad configuration of the Apache server in this case. You can read more about about git disclosure <a href="https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/">here</a>.
 <br>
-To dump data from .git directory I've used <a href="https://github.com/internetwache/GitTools">GitTools</a><br></br>After that I successfully git restored deleted source code files:<br></br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/gittools.png"/><br></br>
+To dump data from .git directory I've used <a href="https://github.com/internetwache/GitTools">GitTools.</a><br></br>After that I successfully git restored deleted source code files:<br></br>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/gittools.png"/><br></br>
 </p>
 
 <h4><i>Authentication exploit</i></h4>
@@ -169,7 +169,7 @@ function get_key($kid) {
 }
 ```
 
-First glance of it showed that the app was using JWT token for authentication along with some Lcobucci library. Without thoroughly analyzing at first, I was thinking that this might be something about the version of that library itself, maybe there was some known vulnerability there that can be further exploited. I had <code>composer.lock </code> file:  
+First glance of it showed that the app was using JWT token for authentication along with some Lcobucci library. Without thoroughly analyzing at first, I was thinking that this might be something about the version of that library itself, maybe there was some known vulnerability that can be further exploited. I had <code>composer.lock </code> file:  
 ```json
  "packages": [
         {
@@ -323,7 +323,7 @@ if ($user) {
 }
 ```
 
-Alright <code>$user</code> variable has that <code>handle_auth()</code> which is returning us an object with JWT's claims. So it was time to re-analyze that <code>auth.php</code> file. Function <code>handle_auth()</code> is checking for cookie session which is supposed to be JWT token after that it is parsing the token and getting the key using <code>get_key($kid)</code> function from "kid" parameter. And verifying the key with a signature that happens to be SHA 384. Taking a better look at <code>get_key($kid)</code> function it takes "kid" parameter from JWT, then it does check on it, if there is no $kid or if $kid is not matching regex pattern or if "kid" doesn't exist as file in <code>/keys/</code> directory set $kid to default symlink that is pointing to key id. After all kid is Header Parameter that is a hint indicating which key
+Alright <code>$user</code> variable has that <code>handle_auth()</code> which is returning us an object with JWT's claims. So it was time to re-analyze that <code>auth.php</code> file. Function <code>handle_auth()</code> is checking for the cookie session which is supposed to be JWT token, after that it is parsing the token and getting the key using <code>get_key($kid)</code> function from "kid" parameter and verifying the key with a signature that happens to be SHA 384. Taking a better look at <code>get_key($kid)</code> function it takes "kid" parameter from JWT, then it does check on it, if there is no $kid or if $kid is not matching regex pattern or if "kid" doesn't exist as file in <code>/keys/</code> directory set $kid to default symlink that is pointing to key id. After all kid is Header Parameter that is a hint indicating which key
 was used to secure the JWS(JSON Web Signature). From RFC:
 <blockquote>
 <pre>
@@ -341,7 +341,7 @@ was used to secure the JWS(JSON Web Signature). From RFC:
 </blockquote>
 <br>
 
-The interesting part of that method was that <code>!preg_match('/[a-f0-9]{32}/', $kid)</code> which pretty much caught my eye. In PHP there are <code>preg_match()</code> and <code>preg_match_all()</code> methods for matching regex pattern however there is one quite significant difference between those:
+The interesting part of that method was: <code>!preg_match('/[a-f0-9]{32}/', $kid)</code> which pretty much caught my eye. In PHP there are <code>preg_match()</code> and <code>preg_match_all()</code> methods for matching regex pattern however there is one quite significant difference between those:
 
 <blockquote>
 <pre>
@@ -362,13 +362,13 @@ Which means that preg_match stops looking after first match while preg_match_all
 
 So as long as my "kid" parameter contains the string to match <code>'/[a-f0-9]{32}/'</code> regex pattern I will be able to bypass that check, next check would be <code>!file_exists('keys/' . $kid)</code> to bypass that it's pretty obvious that we can craft "kid" as a path traversal since file_exist is not sanitized by any mean. But I don't know the id of the key file unfortunately, so it took me a little bit to realize how I can use this as leverage. It is not obvious on the first site( at least it wasn't for me lol) but at the end it is quite simple, just thinking outside of the box.  
   
-The question is: what do I control from this point?
+The question is:<br></br><br></br> - What do I control from this point?
 
 I know that I can craft JWT with "kid" header parameter like: "aaaabbbbaaaabbbbaaaabbbbaaaabbbb", and that would bypass <code>preg_match()</code> but not <code>file_exists()</code> obviously because the file with that name doesn't exist, all what I had to do is to traverse to a file that existed on the server that I knew of. After some thinking and <b><i>numerous</i></b> fail attempts, an idea came to my mind.<br>
-Remembering that I dumped git directory along with some other directories, what I am talking about are git <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">Blobs</a> which are corresponding to inodes or file contents. They are represented with SHA-1 Hash as hex which is ideally what I needed for that regex pattern.<br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/git_objects.png"/>
+Remembering that I dumped git directory along with some other directories, what I am talking about are git <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">Blobs</a> which are corresponding to inodes or file contents. They are represented with SHA-1 as hex which is ideally what I needed for that regex pattern.<br>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/git_objects.png"/>
 <br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/git_blob.png"/>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/git_blob.png"/>
 
 I made a script in Python to test it:  
   
@@ -402,7 +402,7 @@ It seems that worked, I've wanted to access it in a browser with the token that 
 <code> eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCIsImtpZCI6Ii4uLy5naXQvb2JqZWN0cy9iMC9lMjdmNmFkZmY1NGM2NzdkMzE4MjVlZGNkNzViYjZkMGU4NzYzZSJ9.eyJzdWIiOiJhZG1pbiIsIm5hbWUiOiJBZG1pbiIsImFkbWluIjp0cnVlfQ.x8yNHEAT1gafpdszqmUQ61vK6tKXI4yxOMx1sFFsbLKHgLL1UYJiEAkH03Q424sH
 </code>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/admin_log.png"/>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/admin_log.png"/>
 
 Successfully bypassed auth logic.
 
@@ -483,7 +483,7 @@ if ($user) {
     $user_obj = db_query_single("select * from users where username = '{$user['sub']}'");
 }
 ```
-It seems whatever is in JWT's <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2">Sub claim</a> will be embedded directly to the query and not as a parameter to be bound. Which means that prepared statement is not going to protect that query from SQL injection. I've also checked if $user_obj is being displayed somewhere in the html and that was not the case, so I will not be able to see the output of sql injection that I am going to test against. From this it is clear this will be Blind SQL injection. It was time to make a script for this.
+It seems whatever is in JWT's <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2">Sub claim</a> will be embedded directly to the query and not as a parameter to be bound. Which means that prepared statement is not going to protect that query from SQL injection. I've also checked if $user_obj is being displayed somewhere in the html and that was not the case, so I will not be able to see the output of sql injection that I am going to test against. From this it is clear this will be <i>Blind SQL injection</i>.
 </p><br>
 
 <h4><b><i>Blind SQL injection</i></b></h4>
@@ -723,7 +723,7 @@ I modified the script with some "better handling"..<br>
 result was : <code>8ab261ed1a4f2cb73d091920d27ebc6b54b5ea474ba5fafa99a42ed35668</code><br>
 Unfortunately that wasn't the flag, the system didn't accept it, I kept going on for the first ~10 ids.
 
-And it seems I only got values for first 5, tho I did check for key values as well so this were the results:
+And it seems I only got values for first 5, though I did check for key values as well so this were the results:
 
 <ul>
 <li>id 1 key: secret-key | value: 8ab261ed1a4f2cb73d091920d27ebc6b54b5ea474ba5fafa99a42ed35668</li>
@@ -786,14 +786,8 @@ def q(url):
     print("current FLAG: ",flag)
 ```
 
-And that was the flag:<br><br><img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag_ss.png"/><br><img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag.png"/>
+And that was the flag:<br><br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag_ss.png"/><br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag.png"/>
 
 
-
-
-
-
-  
- 
 
 
