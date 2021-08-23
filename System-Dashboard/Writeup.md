@@ -1,5 +1,5 @@
 <h3>#3 Challenge: System-Dashboard</h3><br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/chimg3.png" style="height: 80px;">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/chimg3.png" style="height: 80px;">
 <br>
 <h4><i>Challenge description:</i></h4>
 
@@ -37,6 +37,7 @@ The commands were:
  <li>stat /app/flag.txt</li>
 </ul>
 <br>
+</br>
 Since I was interested in the flag, I've checked the response for that stat command which looked something like this:   
 <blockquote>
 <pre>
@@ -99,7 +100,7 @@ Nothing seemed unusual there, this challenge though does require some "digital f
 I decided to pull that docker image and set it up locally to see what is in that /app/ directory.
 </p>
 <br>
-
+</br>
 <h4><i>Docker inspection</i></h4>
 
 <p>
@@ -212,21 +213,19 @@ The <i>config.json</i>:
 
 ```
 
-Since those are <a href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm">ecdsa's</a> signatures, I was hoping this will be one of those nonce reusable attacks, but that wasn't the case, as you can see all those signature don't have common starting bytes so the same nonce wasn't used in process of signing. And from previous source code, key verification was using nonce + command to verify signature, which means nonce was used as salt.<br></br>
+Since those are <a href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm">ecdsa's</a> signatures, I was hoping this will be one of those <a href="https://billatnapier.medium.com/ecdsa-weakness-where-nonces-are-reused-2be63856a01ab">nonce reusable attacks</a>, but that wasn't the case, as you can see all those signature don't have common starting bytes so the same nonce wasn't used in process of signing. And from previous source code, key verification was using nonce + command to verify signature, which means nonce was used as salt.<br></br>
 I've continued exploring around to see if there is anything more interesting out there but there was nothing that caught my eye, at this point I was checking for various python libraries that are being used and their versions in hope there is some sort of already known vulnerability. After some time of enumeration I looked up what are common forensics practices for docker. One of the things that popped was a tool called <a href="https://github.com/wagoodman/dive" >dive</a>. Dive is basically a tool for exploring docker images and layers.
 </p>
 
-<br>
+<br></br>
 <p>Fortunately I found something interesting in one of the layers</p>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/dive1.png">
-<br>
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/dive1.png">
+<br></br>
 <p>There were two interesting scripts added: register-commands.py and register-commands.sh. I quickly looked for those file, there are multiple ways of searching through docker overlay2 directory, I am specifically looking for diff on those scripts - </p>
 ```bash
-
 ls -la /var/lib/docker/overlay2/*/diff/register-commands.py && ls -la /var/lib/docker/overlay2/*/diff/register-commands.sh
-
 ```
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/rcom.png">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/rcom.png">
 
 The content looked pretty interesting:
 
@@ -288,7 +287,7 @@ with open('/app/config.json', 'w') as f:
 In that bash script the Private key is being generated as a tmp file using mktemp command, I decided to take a look back to the dive layer inspector and check if there are any changes in the tmp directory.<br>
 And there were changes indeed:  
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/tmp.png">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/tmp.png">
 
 I searched for tmp directory in layer and I found private key
 
@@ -334,13 +333,13 @@ Now it was the time to test the signature and get a flag.<br>
 The form had cmd and sig input fields:
 
 <br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/form.png">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/form.png">
 
 so I replaced the cmd to cat the flag, and signature that my script produced.
 <code>cmd="cat /app/flag.txt" sig="d0FYclQ9I8eVQWTIg7vUYEY1UUPk0GQkbj03dS2oyvobAjiX45x85LNgIqwaHZfIMayITprlX6XWqApRCFMz5A==" </code>
 
 <p>But I didn't get the flag unfortunately :(<br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/noflag.png">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/noflag.png">
 
 I had to take a look at the template of the page and check if there is any rendering data logic there. And it looks like it was a typical Jinja template.
 
@@ -433,8 +432,8 @@ ip n > /dev/null | cat /app/flag.txt
 </pre>
 I've resigned this command with that python script that I made earlier and tried making post request once again.<br>
 And finally got my <b><i>flag</i></b><br>
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/flag.png">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/flag.png">
 </p>
 
-<img src="https://github.com/DejanJS/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/flag2.png">
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/System-Dashboard/screenshots/flag2.png">
 
