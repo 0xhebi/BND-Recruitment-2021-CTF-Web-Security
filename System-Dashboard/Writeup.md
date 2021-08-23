@@ -38,7 +38,7 @@ The commands were:
 </ul>
 <br>
 </br>
-Since I was interested in the flag, I've checked the response for that stat command which looked something like this:<br>  
+Since I was interested in the flag, I've checked the response for that stat command which looked something like this:<br></br> 
 <blockquote>
 <pre>
 # stat /app/flag.txt
