@@ -92,7 +92,6 @@ To dump data from .git directory I've used <a href="https://github.com/internetw
 As seen there are a lot of restored files, they mentioned that login form didn't have any vulnerabilities. I've checked the login.php just in case and there was nothing interesting there.
 </p>
 ```php
-
 <?php
 
 include('inc/init.php');
@@ -123,9 +122,8 @@ setcookie('session', $jwt);
 header('Location: /');
 ```
 
-<p>
 Typical credentials check with Sqlite prepared statement. Next there was <code>/inc</code> directory with <code>auth.php</code> page, which contained some auth logic:
-</p>
+
 
 ```php
 <?php
