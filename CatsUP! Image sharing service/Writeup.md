@@ -1,8 +1,10 @@
 <h3>#1 Challenge: CatsUP! image sharing service</h3><br>
-<cite>Level: Medium</cite><br>
-<cite>Points: 200</cite><br>
+<pre><i>Level: Medium</i>
+<i>Points: 200</i></pre>
+
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/chimg.png" style="height: 80px;">
 <br>
+
 <h4><i>Challenge description:</i></h4>
 
 <blockquote>
@@ -146,11 +148,10 @@ At this point I was tapping in place for a while. After some time passed I've de
 </x:xmpmeta>
 ```
 
-<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>- Why didn't I try uploading SVG that contains JavaScript in the first place???<br></br>I converted my test.jpeg into test.svg, added a simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
+<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>- Why didn't I try uploading SVG that contains JavaScript in the first place???<br></br>I converted my test.jpeg into test.svg, added a simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br></p>
 
-Next question:<br></br>
+<p> Next question:<br></br>- Where the hell will this trigger?<br></br>
 
-- Where the hell will this trigger?<br></br>
 Well it was quite fishy that below the uploaded image they had a "Download Original" link and next to it: <b>(use save link target as)</b>. 
 <br></br>
 </p>
