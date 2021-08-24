@@ -1,4 +1,6 @@
 <h3>#1 Challenge: CatsUP! image sharing service</h3><br>
+<cite>Level: Medium</cite><br>
+<cite>Points: 200</cite><br>
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/chimg.png" style="height: 80px;">
 <br>
 <h4><i>Challenge description:</i></h4>
@@ -23,7 +25,7 @@
 
 <h4><i>Intro/Thought process</i></h4>
 
-<p>After reading the description, the name of the challenge is called CatsUP - first thought that came through my mind is that this challenge will be about some sort of XSS vulnerability. The reason is that from my previous experiences on CTFs usually title that includes "Cats" are about XSS.(I am quite sure that nearly every CTF player or security person knows this duuh!). Of course that doesn't mean that I am straight away right that this will be about XSS only.</p>
+<p>Reading the description and the name of the challenge "CatsUP" - first thought that came through my mind is that this challenge will be about some sort of XSS vulnerability. The reason is that from my previous experiences on CTFs usually title that includes "Cats" are about XSS.(I am quite sure that nearly every CTF player or security person knows this duuh!). Of course that doesn't mean that I am straight away right that this will be about XSS only.</p>
 <p>Anyway, the plan is to do some enumeration and hope that I will find some weird behaviour.</p>
 
 <h4><i>Finding of Initial Vector</i></h4>
@@ -127,7 +129,7 @@ Content-Type: image/jpeg
 Content-Disposition: form-data; name="file%22; filename=%22test.<img src=xx onerror=alert(1)>"
 ```
 <p>
-At this point I was tapping in place for a while. After some time passed I've decided to look up other features of the app. Browsed a random image of a cat and downloaded it(through save image as). Exiftoold the image to see if there is anything interesting there. There was no interesting metadata in the image itself. Got an idea of trying to sneak JavaScript again through some exif metadata like Artist/Creator. And that was unfortunately sanitized as well: </p>
+At this point I was tapping in place for a while. After some time passed I've decided to look up other features of the app. Browsed a random image of a cat and downloaded it(through save image as). Exiftoold the image to see if there is anything interesting there. But there was no interesting metadata in the image itself. Got an idea of trying to sneak JavaScript again through some exif metadata like Artist/Creator. And that was unfortunately sanitized as well: </p>
 
 
 ```xml
@@ -144,10 +146,11 @@ At this point I was tapping in place for a while. After some time passed I've de
 </x:xmpmeta>
 ```
 
-<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>why didn't I try uploading SVG that contains JavaScript in the first place???<br></br>I converted my test.jpeg into test.svg, added a simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
+<p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>- Why didn't I try uploading SVG that contains JavaScript in the first place???<br></br>I converted my test.jpeg into test.svg, added a simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br>
 
-Next question: where the hell will this trigger?<br></br>
+Next question:<br></br>
 
+- Where the hell will this trigger?<br></br>
 Well it was quite fishy that below the uploaded image they had a "Download Original" link and next to it: <b>(use save link target as)</b>. 
 <br></br>
 </p>
@@ -188,7 +191,7 @@ Well it was quite fishy that below the uploaded image they had a "Download Origi
 <b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}</b>
 
 
-<p>After I got my session I had to find a token that was not in the cookie. I connected the dots quite fast because of that robot.txt at the start,all what I had to do was to modify my script a little bit in a way that will cause the reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in context of an admin and exfiltrate data. 
+<p>After I got my session I had to find a token that was not in the cookie. I connected the dots quite fast because of that robot.txt at the start,all what I had to do was to modify my script a little bit in a way that will cause the reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in the context of an admin and exfiltrate data. 
 <br></br>Here is my modified script:</p>
 
 ```javascript
