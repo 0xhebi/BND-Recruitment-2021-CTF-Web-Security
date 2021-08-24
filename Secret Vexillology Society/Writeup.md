@@ -1,5 +1,10 @@
 <h3>#2 Challenge: Secret Vexillology Society</h3> 
-<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/101.png" style="height: 80px;">
+<pre>
+<i>Level: Hard</i>
+<i>Points: 300</i> 
+</pre>
+
+<img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/101.png" style="height: 80px;"><br>
 
 <h4><i>Challenge description: </i></h4>
 <blockquote>
@@ -65,7 +70,7 @@ Fatal error: Uncaught Error: Call to a member function bindValue() on bool in /v
 </pre>
 <p>
 Interesting, this definitely gave me info about the stack that is being used, it is Sqlite3 and it seems there are some prepared statements. I instantly thought about testing for LFI, but later on this will probably lead to some SQL injection.  
-  
+
 Typical LFI to start with <code>/edit.php?user_obj=../../.././../../../var/www/html/admin.php</code><br>
 That didn't work so I tried <code>/edit.php?user_obj=php://filter/convert.base64-encode/resource=admin.php</code><br> Changing parameters from user_obj to post_id and trying to leak something all over again for various resources just didn't seem to work at all. As well I've tried other path traversals to other files with other known LFI techniques but without success. Slowly I was running out of ideas, other paths with 302 response were just redirecting back to index.php which wasn't of any use to me. After <b><i>hours</i></b> of thinking something came up to my mind randomly, I wanted to check if there was /.git/ directory or any kind of similar configs...<br>  
 <code>/.git/</code> seemed to be forbidden which mean it exists, then I tried <code>/.git/config</code><br><br>
@@ -361,7 +366,7 @@ After the first match is found, the subsequent searches are continued on from en
 Which means that preg_match stops looking after first match while preg_match_all continues until it finishes processing the entire string.<br>
 
 So as long as my "kid" parameter contains the string to match <code>'/[a-f0-9]{32}/'</code> regex pattern I will be able to bypass that check, next check would be <code>!file_exists('keys/' . $kid)</code> to bypass that it's pretty obvious that we can craft "kid" as a path traversal since file_exist is not sanitized by any mean. But I don't know the id of the key file unfortunately, so it took me a little bit to realize how I can use this as leverage. It is not obvious on the first site( at least it wasn't for me lol) but at the end it is quite simple, just thinking outside of the box.  
-  
+
 The question is:<br></br><br></br> - What do I control from this point?
 
 I know that I can craft JWT with "kid" header parameter like: "aaaabbbbaaaabbbbaaaabbbbaaaabbbb", and that would bypass <code>preg_match()</code> but not <code>file_exists()</code> obviously because the file with that name doesn't exist, all what I had to do is to traverse to a file that existed on the server that I knew of. After some thinking and <b><i>numerous</i></b> fail attempts, an idea came to my mind.<br>
@@ -371,7 +376,7 @@ Remembering that I dumped git directory along with some other directories, what 
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/git_blob.png"/>
 
 I made a script in Python to test it:  
-  
+
 ```python
 
 import requests
@@ -410,7 +415,7 @@ Successfully bypassed auth logic.
 <h4><b><i>Getting the flag</i></b></h4>
 <p>
 Last step was leaking the data from the database. After successfully bypassing the flag I was able to edit posts that were made. I've checked the source code of <code>edit.php</code>  
-  
+
 ```php
 <?php
 include('inc/header.php');
@@ -477,7 +482,7 @@ function db_query_single($sql, $params = NULL) {
 ```
 
 It was SQLite3 and those 2 methods were definitely wrappers for <a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-1-prepared-statements-with-parameterized-queries">prepared statements</a>. So I didn't see the space for SQL injection on that <code>edit.php</code> page. I've analyzed other files and there was one interesting line in <code>/inc/init.php</code>  
-  
+
 ```php
 if ($user) {
     $user_obj = db_query_single("select * from users where username = '{$user['sub']}'");
@@ -490,7 +495,7 @@ It seems whatever is in JWT's <a href="https://datatracker.ietf.org/doc/html/rfc
 <p>
 First I had to craft JWT with "Sub" claim that included my injection and to confirm this is blind approach.Using the same method from before to login as admin just modified the sub claim:<br>
 
-  
+
 ```python
 
 import requests
@@ -608,7 +613,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCIsImtpZCI6Ii4uLy5naXQvb2JqZWN0cy9iMC9lMjdmNmFk
 </p>
 <p>
 However when I tested it for fail response with <code>admin' AND 1=2 --</code> I got:
-  
+
 ```html
 Logged in as admin! <!doctype html>
 <html>
@@ -657,7 +662,7 @@ Stack trace:
   thrown in <b>/var/www/html/inc/db.php</b> on line <b>15</b><br />
  
 eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCIsImtpZCI6Ii4uLy5naXQvb2JqZWN0cy9iMC9lMjdmNmFkZmY1NGM2NzdkMzE4MjVlZGNkNzViYjZkMGU4NzYzZSJ9.eyJzdWIiOiJhZG1pbicgQU5EIDE9MiAtLSIsIm5hbWUiOiJBZG1pbiIsImFkbWluIjp0cnVlfQ.Pjy6XNk0hag_g4DOO1pF1PzG1rxA2PZaxsQ5Y2VDbib9bPw4dh2zBylvffZWhjKZ
-``` 
+```
 
 It did return 200 status code which means that auth succeeded with that error Stack trace, which concludes this is blind sql injection, but I had to modify that script for better error handling.<br>  
 Now it was pretty much time to start enumerating database and search for that flag, luckily we had <code>/data/create.sql</code>:  
@@ -686,7 +691,7 @@ CREATE TABLE posts (
 );
 ```
 That might speed up the process. My first target was secrets, I’ve started off with checking the value of secret with id of 1.  
-  
+
 ```python
 import requests
 import json
@@ -787,7 +792,6 @@ def q(url):
 ```
 
 And that was the <b><i>flag</i></b>:<br><br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag_ss.png"/><br></br><img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/Secret%20Vexillology%20Society/screenshots/flag.png"/>
-
 
 
 
